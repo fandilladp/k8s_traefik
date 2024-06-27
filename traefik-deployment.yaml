@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: operations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      containers:
+      - name: traefik
+        image: traefik:v2.4
+        args:
+        - "--api.insecure=true"
+        - "--providers.kubernetescrd"
+        - "--entrypoints.web.address=:80"
+        volumeMounts:
+        - mountPath: "/data"
+          name: traefik-storage
+        ports:
+        - name: web
+          containerPort: 80
+        - name: admin
+          containerPort: 8080
+      volumes:
+      - name: traefik-storage
+        persistentVolumeClaim:
+          claimName: traefik-pvc
